@@ -12,7 +12,12 @@ const formElement = document.querySelector(".to-do__form");
 const inputElement = document.querySelector(".to-do__input");
 
 function loadTasks() {
-
+	const savedTasks = localStorage.getItem('toDoTasks'); 
+    if (savedTasks) {
+        return JSON.parse(savedTasks); 
+    } else {
+        return items;
+    }
 }
 
 function createItem(item) {
@@ -23,13 +28,70 @@ function createItem(item) {
   const duplicateButton = clone.querySelector(".to-do__item-button_type_duplicate");
   const editButton = clone.querySelector(".to-do__item-button_type_edit");
 
+  textElement.textContent = item;
+  
+  deleteButton.addEventListener('click', function() {
+        clone.remove();
+        const items = getTasksFromDOM();
+        saveTasks(items);
+    });
+
+	duplicateButton.addEventListener('click', function() {
+        const itemName = textElement.textContent;
+        const newItem = createItem(itemName);
+        listElement.prepend(newItem);
+        const items = getTasksFromDOM();
+        saveTasks(items);
+    });
+
+	editButton.addEventListener('click', function() {
+        textElement.setAttribute('contenteditable', 'true');
+        
+        textElement.focus();
+    });
+
+    textElement.addEventListener('blur', function() {
+        textElement.setAttribute('contenteditable', 'false'); 
+        
+        items = getTasksFromDOM();
+        saveTasks(items);
+    });
+
+  return clone;
 }
 
 function getTasksFromDOM() {
-
+	const itemsNamesElements = document.querySelectorAll(".to-do__item-text");
+    const tasks = [];
+    
+    itemsNamesElements.forEach(itemsNamesElements => {
+        tasks[tasks.length] = itemsNamesElements.textContent;
+    });
+    
+    return tasks; 
 }
 
 function saveTasks(tasks) {
-
+	localStorage.setItem('toDoTasks', JSON.stringify(tasks));
 }
 
+formElement.addEventListener('submit', function(event) {
+    event.preventDefault();
+    const taskText = inputElement.value.trim(); 
+    if (taskText === '') {
+        return;
+    }
+    const newTaskElement = createItem(taskText);
+    listElement.prepend(newTaskElement); 
+
+	items = getTasksFromDOM();
+	saveTasks(items);
+
+    inputElement.value = '';
+});
+
+items = loadTasks();
+items.forEach(item => {
+    const newItem = createItem(item);
+    listElement.append(newItem);
+});
