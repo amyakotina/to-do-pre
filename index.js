@@ -1,11 +1,13 @@
-let items = [
+const initialize_items = Object.freeze([
 	"Сделать проектную работу",
 	"Полить цветы",
 	"Пройти туториал по Реакту",
 	"Сделать фронт для своего проекта",
 	"Прогуляться по улице в солнечный день",
 	"Помыть посуду",
-];
+]);
+
+let items; 
 
 const listElement = document.querySelector(".to-do__list");
 const formElement = document.querySelector(".to-do__form");
@@ -16,56 +18,58 @@ function loadTasks() {
     if (savedTasks) {
         return JSON.parse(savedTasks); 
     } else {
-        return items;
+        return initialize_items;
     }
 }
 
 function createItem(item) {
 	const template = document.getElementById("to-do__item-template");
 	const clone = template.content.querySelector(".to-do__item").cloneNode(true);
-  const textElement = clone.querySelector(".to-do__item-text");
-  const deleteButton = clone.querySelector(".to-do__item-button_type_delete");
-  const duplicateButton = clone.querySelector(".to-do__item-button_type_duplicate");
-  const editButton = clone.querySelector(".to-do__item-button_type_edit");
+    const textElement = clone.querySelector(".to-do__item-text");
+    const deleteButton = clone.querySelector(".to-do__item-button_type_delete");
+    const duplicateButton = clone.querySelector(".to-do__item-button_type_duplicate");
+    const editButton = clone.querySelector(".to-do__item-button_type_edit");
 
-  textElement.textContent = item;
+    textElement.textContent = item;
   
-  deleteButton.addEventListener('click', function() {
+    deleteButton.addEventListener('click', function() {
         clone.remove();
-        const items = getTasksFromDOM();
-        saveTasks(items);
+        const currentTasks = getTasksFromDOM(); 
+        saveTasks(currentTasks);
+        items = currentTasks; 
     });
 
 	duplicateButton.addEventListener('click', function() {
         const itemName = textElement.textContent;
         const newItem = createItem(itemName);
         listElement.prepend(newItem);
-        const items = getTasksFromDOM();
-        saveTasks(items);
+        const currentTasks = getTasksFromDOM(); 
+        saveTasks(currentTasks);
+        items = currentTasks; 
     });
 
 	editButton.addEventListener('click', function() {
         textElement.setAttribute('contenteditable', 'true');
-        
         textElement.focus();
     });
 
     textElement.addEventListener('blur', function() {
         textElement.setAttribute('contenteditable', 'false'); 
-        
-        items = getTasksFromDOM();
-        saveTasks(items);
+        const currentTasks = getTasksFromDOM(); 
+        saveTasks(currentTasks);
+        items = currentTasks; 
     });
 
-  return clone;
+    return clone;
 }
 
 function getTasksFromDOM() {
 	const itemsNamesElements = document.querySelectorAll(".to-do__item-text");
     const tasks = [];
     
-    itemsNamesElements.forEach(itemsNamesElements => {
-        tasks[tasks.length] = itemsNamesElements.textContent;
+    itemsNamesElements.forEach(element => {
+        const taskText = element.textContent;
+        tasks[tasks.length] = taskText;
     });
     
     return tasks; 
@@ -84,8 +88,9 @@ formElement.addEventListener('submit', function(event) {
     const newTaskElement = createItem(taskText);
     listElement.prepend(newTaskElement); 
 
-	items = getTasksFromDOM();
-	saveTasks(items);
+    const currentTasks = getTasksFromDOM(); 
+    saveTasks(currentTasks);
+    items = currentTasks;
 
     inputElement.value = '';
 });
